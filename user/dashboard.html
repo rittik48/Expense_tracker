@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>User Dashboard | Expense Tracker</title><link rel="stylesheet" href="../css/style.css"></head>
+<body>
+<div class="app-shell">
+<aside class="sidebar">
+  <a class="brand" href="dashboard.html">💰 Expense<span>Tracker</span></a>
+  <nav class="side-nav">
+    <a class="active" href="dashboard.html">▣ Dashboard</a>
+    <a href="add-expense.html">＋ Add Expense</a>
+    <a href="expenses.html">☷ My Expenses</a>
+    <a href="budget.html">◎ Budget</a>
+    <a href="reports.html">◔ Reports</a>
+  </nav>
+  <div class="sidebar-bottom"><a href="#" onclick="logout();return false;" class="side-nav a">↪ Logout</a></div>
+</aside>
+<main class="main">
+  <div class="topbar"><div class="page-title"><h1>Dashboard</h1><p id="dateText"></p></div><div class="profile"><div><b id="userName"></b><small class="muted"> User</small></div><div class="avatar" id="avatar">U</div></div></div>
+  <section class="cards">
+    <div class="stat-card"><div class="stat-label">MONTHLY BUDGET</div><div class="stat-value" id="budget">₹0</div><div class="stat-note">Your current limit</div></div>
+    <div class="stat-card"><div class="stat-label">THIS MONTH</div><div class="stat-value" id="expense">₹0</div><div class="stat-note">Total spending</div></div>
+    <div class="stat-card"><div class="stat-label">REMAINING</div><div class="stat-value" id="remaining">₹0</div><div class="stat-note" id="remainingNote">Budget balance</div></div>
+    <div class="stat-card"><div class="stat-label">TRANSACTIONS</div><div class="stat-value" id="transactions">0</div><div class="stat-note">This month</div></div>
+  </section>
+  <section class="dashboard-grid">
+    <div class="panel"><div class="panel-header"><h2>Recent Transactions</h2><a class="btn btn-outline" href="expenses.html">View all</a></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th></tr></thead><tbody id="recent"></tbody></table></div></div>
+    <div class="panel"><div class="panel-header"><h2>Spending by Category</h2><a class="btn btn-outline" href="reports.html">Reports</a></div><div id="categories" class="bar-list"></div></div>
+  </section>
+</main></div>
+<script src="../js/auth.js"></script><script src="../js/app.js"></script>
+<script>
+const user=requireRole("user");
+if(user){
+document.getElementById("userName").textContent=user.name;document.getElementById("avatar").textContent=user.name.charAt(0).toUpperCase();
+document.getElementById("dateText").textContent=new Date().toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+const ex=monthExpenses(user.id), total=totalExpenses(ex), budgets=getBudgets(), budget=Number(budgets[user.id]||0), rem=budget-total;
+document.getElementById("budget").textContent=money(budget);document.getElementById("expense").textContent=money(total);document.getElementById("remaining").textContent=money(rem);document.getElementById("remaining").className="stat-value "+(rem<0?"danger-text":"success-text");document.getElementById("remainingNote").textContent=budget?(rem<0?"Budget exceeded":"Available budget"):"Set a budget";document.getElementById("transactions").textContent=ex.length;
+const recent=[...ex].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6);document.getElementById("recent").innerHTML=recent.length?recent.map(e=>`<tr><td>${e.date}</td><td><span class="badge">${escapeHtml(e.category)}</span></td><td>${escapeHtml(e.description||"-")}</td><td><b>${money(e.amount)}</b></td></tr>`).join(""):`<tr><td colspan="4"><div class="empty">No expenses this month. Add your first expense.</div></td></tr>`;
+const cats={};ex.forEach(e=>cats[e.category]=(cats[e.category]||0)+e.amount);const max=Math.max(...Object.values(cats),1);
+document.getElementById("categories").innerHTML=Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="bar-row"><span>${escapeHtml(k)}</span><div class="bar-track"><div class="bar-fill" style="width:${v/max*100}%"></div></div><b>${money(v)}</b></div>`).join("")||`<div class="empty">No category data yet.</div>`;
+}
+</script></body></html>

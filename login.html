@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | Expense Tracker</title><link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-body">
+  <div class="auth-card">
+    <a class="brand centered" href="index.html">💰 Expense<span>Tracker</span></a>
+    <h1>Welcome back</h1><p class="muted">Sign in to continue to your dashboard.</p>
+    <div id="loginAlert" class="alert hidden"></div>
+    <form id="loginForm">
+      <label>Email<input id="email" type="email" required placeholder="you@example.com"></label>
+      <label>Password<input id="password" type="password" required placeholder="••••••••"></label>
+      <button class="btn btn-primary full" type="submit">Login</button>
+    </form>
+    <div class="demo-box"><strong>Demo Admin</strong><br>admin@expense.com / admin123</div>
+    <p class="auth-footer">Don't have an account? <a href="signup.html">Create one</a></p>
+    <a href="index.html" class="back-link">← Back to home</a>
+  </div>
+  <script src="js/auth.js"></script>
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", function(e){
+      e.preventDefault();
+      const result = loginUser(document.getElementById("email").value.trim(), document.getElementById("password").value);
+      const alertBox = document.getElementById("loginAlert");
+      alertBox.className = "alert " + (result.ok ? "success" : "error");
+      alertBox.textContent = result.message;
+      if (result.ok) setTimeout(() => location.href = result.user.role === "admin" ? "admin/dashboard.html" : "user/dashboard.html", 500);
+    });
+  </script>
+</body>
+</html>
